@@ -12,7 +12,45 @@ body {
   background: #eef2f7; color: #1a1a2e; font-size: 14px; min-height: 100vh;
 }
 
+/* ── 密碼畫面 ── */
+#pw-screen {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; padding: 24px; background: #1a3a5c;
+}
+.pw-box {
+  background: #fff; border-radius: 20px; padding: 40px 32px;
+  max-width: 340px; width: 100%; text-align: center;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+.pw-icon { font-size: 48px; margin-bottom: 14px; }
+.pw-box h2 { font-size: 18px; font-weight: 700; color: #1a3a5c; margin-bottom: 6px; }
+.pw-box p { font-size: 13px; color: #888; margin-bottom: 22px; }
+.pw-input {
+  width: 100%; border: 2px solid #dce5f0; border-radius: 10px;
+  padding: 12px 16px; font-size: 18px; text-align: center;
+  letter-spacing: 6px; color: #1a3a5c; background: #f5f8fc;
+  margin-bottom: 12px; outline: none;
+  transition: border-color .2s;
+}
+.pw-input:focus { border-color: #2563a0; }
+.pw-input.error { border-color: #e74c3c; animation: shake .3s; }
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+.pw-btn {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, #1a3a5c, #2563a0);
+  color: #fff; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  transition: opacity .2s;
+}
+.pw-btn:active { opacity: .85; }
+.pw-error { color: #e74c3c; font-size: 13px; margin-top: 10px; height: 18px; }
+
 /* ── Header ── */
+#app { display: none; }
 header {
   background: #1a3a5c; color: #fff;
   padding: 12px 16px;
@@ -49,7 +87,7 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
   font-size: 13px; line-height: 1.6; display: none; text-align: left;
 }
 
-/* ── 篩選列（緊湊單行） ── */
+/* ── 篩選列 ── */
 #main-content { display: none; }
 .filter-bar {
   background: #fff; margin: 10px 12px 0;
@@ -80,9 +118,7 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
 .btn-reset:active { background: #f0f4fa; }
 
 /* ── 統計列 ── */
-.stats-row {
-  margin: 6px 12px 0; font-size: 12px; color: #888; padding: 2px 2px;
-}
+.stats-row { margin: 6px 12px 0; font-size: 12px; color: #888; }
 .stats-row strong { color: #2563a0; }
 
 /* ── 手機卡片 ── */
@@ -94,11 +130,9 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
 .card-top { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; flex-wrap: wrap; }
 .card-no { font-size: 11px; color: #bbb; font-weight: 600; min-width: 36px; }
 .card-type { background: #e8f0fe; color: #1a4ca0; border-radius: 5px; padding: 2px 9px; font-size: 12px; font-weight: 700; }
-.card-badge {
-  border-radius: 20px; padding: 2px 9px;
-  font-size: 11px; font-weight: 700; white-space: nowrap;
-}
+.card-badge { border-radius: 20px; padding: 2px 9px; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .badge-rented { background: #e6f9ee; color: #1a7a3a; }
+.badge-sold   { background: #fef3e2; color: #b7770d; }
 .badge-stock  { background: #f0f4fa; color: #999; }
 .btn-photo {
   margin-left: auto;
@@ -112,9 +146,10 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
 .ci.full { grid-column: 1 / -1; }
 .ci-label { font-size: 10px; color: #bbb; font-weight: 600; }
 .ci-val { font-size: 13px; color: #222; }
-.ci-val.price { color: #1a7a3a; font-weight: 700; }
-.ci-val.small { font-size: 11px; color: #555; }
-.ci-val.rent  { font-size: 11px; color: #2563a0; }
+.ci-val.price  { color: #1a7a3a; font-weight: 700; }
+.ci-val.sold-price { color: #b7770d; font-weight: 700; }
+.ci-val.small  { font-size: 11px; color: #555; }
+.ci-val.rent   { font-size: 11px; color: #2563a0; }
 
 /* ── 桌機表格 ── */
 @media (min-width: 768px) {
@@ -124,7 +159,7 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
     box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; display: block;
   }
   .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { width: 100%; border-collapse: collapse; min-width: 880px; }
+  table { width: 100%; border-collapse: collapse; min-width: 960px; }
   thead th {
     background: #1a3a5c; color: #fff; padding: 10px 11px;
     font-size: 12px; font-weight: 600; text-align: left; white-space: nowrap;
@@ -133,15 +168,16 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
   tbody tr:hover { background: #f4f8ff; }
   tbody tr:last-child { border-bottom: none; }
   td { padding: 8px 11px; vertical-align: middle; font-size: 13px; }
-  .t-no   { color: #bbb; text-align: center; width: 42px; font-size: 12px; }
-  .t-tag  { display: inline-block; background: #e8f0fe; color: #1a4ca0; border-radius: 5px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
-  .t-num  { text-align: center; }
-  .t-price{ text-align: right; color: #1a7a3a; font-weight: 700; }
+  .t-no    { color: #bbb; text-align: center; width: 42px; font-size: 12px; }
+  .t-tag   { display: inline-block; background: #e8f0fe; color: #1a4ca0; border-radius: 5px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .t-num   { text-align: center; }
+  .t-price { text-align: right; color: #1a7a3a; font-weight: 700; }
+  .t-sold-price { text-align: right; color: #b7770d; font-weight: 700; }
   .t-active { color: #1a7a3a; font-weight: 600; }
-  .t-dim  { color: #ccc; }
-  .t-note { font-size: 12px; color: #666; max-width: 170px; }
-  .t-rent { font-size: 12px; color: #2563a0; }
-  .t-photo{ text-align: center; }
+  .t-dim   { color: #ccc; }
+  .t-note  { font-size: 12px; color: #666; max-width: 170px; }
+  .t-rent  { font-size: 12px; color: #2563a0; }
+  .t-photo { text-align: center; }
 }
 @media (max-width: 767px) { .table-wrap { display: none; } }
 
@@ -165,18 +201,10 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
   background: #f0f4fa; border: none; border-radius: 8px;
   padding: 6px 12px; font-size: 13px; cursor: pointer; color: #555;
 }
-.modal-close:active { background: #dce5f0; }
-
-.photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 8px;
-}
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
 .photo-grid img {
   width: 100%; aspect-ratio: 4/3; object-fit: cover;
-  border-radius: 8px; cursor: pointer;
-  transition: opacity .15s;
-  background: #eef2f7;
+  border-radius: 8px; cursor: pointer; background: #eef2f7; transition: opacity .15s;
 }
 .photo-grid img:active { opacity: .75; }
 .photo-status { text-align: center; padding: 28px 16px; color: #aaa; font-size: 13px; line-height: 1.7; }
@@ -184,8 +212,7 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
 /* ── 全螢幕單張 ── */
 #img-viewer {
   display: none; position: fixed; inset: 0; z-index: 300;
-  background: rgba(0,0,0,0.96);
-  align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.96); align-items: center; justify-content: center;
 }
 #img-viewer.open { display: flex; }
 #img-viewer img { max-width: 96vw; max-height: 92vh; object-fit: contain; border-radius: 6px; }
@@ -198,54 +225,71 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
 </head>
 <body>
 
-<header>
-  <div class="icon">🏗️</div>
-  <div>
-    <h1>堆高機存貨、租賃明細</h1>
-    <div class="sub" id="header-sub">載入中...</div>
-  </div>
-</header>
-
-<!-- 載入畫面 -->
-<div id="load-screen">
-  <div class="load-box">
-    <div class="load-icon">⏳</div>
-    <h2>載入資料中</h2>
-    <p>正在讀取 Excel 檔案，請稍候...</p>
-    <div class="spinner" id="spinner"></div>
-    <div class="error-box" id="error-box"></div>
+<!-- ── 密碼畫面 ── -->
+<div id="pw-screen">
+  <div class="pw-box">
+    <div class="pw-icon">🔐</div>
+    <h2>堆高機存貨系統</h2>
+    <p>請輸入密碼以繼續</p>
+    <input class="pw-input" id="pw-input" type="password"
+           placeholder="••••" maxlength="20"
+           onkeydown="if(event.key==='Enter') checkPw()">
+    <button class="pw-btn" onclick="checkPw()">進入</button>
+    <div class="pw-error" id="pw-error"></div>
   </div>
 </div>
 
-<!-- 主內容 -->
-<div id="main-content">
-  <div class="filter-bar">
-    <select id="f-type"><option value="">全部型號</option></select>
-    <select id="f-ton"><option value="">全部噸數</option></select>
-    <select id="f-height"><option value="">全部揚高</option></select>
-    <select id="f-brand"><option value="">全部廠牌</option></select>
-    <input type="search" id="f-search" placeholder="搜尋廠商、規格、備註...">
-    <button class="btn-reset" onclick="resetFilters()">✕ 重設</button>
+<!-- ── 主應用 ── -->
+<div id="app">
+  <header>
+    <div class="icon">🏗️</div>
+    <div>
+      <h1>堆高機存貨、租賃明細</h1>
+      <div class="sub" id="header-sub">載入中...</div>
+    </div>
+  </header>
+
+  <!-- 載入畫面 -->
+  <div id="load-screen">
+    <div class="load-box">
+      <div class="load-icon">⏳</div>
+      <h2>載入資料中</h2>
+      <p>正在讀取 Excel 檔案，請稍候...</p>
+      <div class="spinner" id="spinner"></div>
+      <div class="error-box" id="error-box"></div>
+    </div>
   </div>
-  <div class="stats-row" id="stats-row"></div>
 
-  <!-- 手機：卡片 -->
-  <div class="cards" id="cards"></div>
-  <div class="no-results" id="no-results">查無符合資料</div>
+  <!-- 主內容 -->
+  <div id="main-content">
+    <div class="filter-bar">
+      <select id="f-type"><option value="">全部型式</option></select>
+      <select id="f-ton"><option value="">全部噸數</option></select>
+      <select id="f-height"><option value="">全部揚高</option></select>
+      <select id="f-brand"><option value="">全部廠牌</option></select>
+      <input type="search" id="f-search" placeholder="搜尋廠商、型號、備註...">
+      <button class="btn-reset" onclick="resetFilters()">✕ 重設</button>
+    </div>
+    <div class="stats-row" id="stats-row"></div>
 
-  <!-- 桌機：表格 -->
-  <div class="table-wrap">
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>NO</th><th>型號</th><th>廠商</th><th>廠牌</th><th>型號規格</th>
-            <th>噸數</th><th>揚高</th><th>單價</th><th>狀況</th>
-            <th>地點</th><th>租期</th><th>進貨日期</th><th>備註</th><th>設定</th><th>照片</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
+    <!-- 手機：卡片 -->
+    <div class="cards" id="cards"></div>
+    <div class="no-results" id="no-results">查無符合資料</div>
+
+    <!-- 桌機：表格 -->
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>NO</th><th>型式</th><th>廠商</th><th>廠牌</th><th>型號</th>
+              <th>噸數</th><th>揚高</th><th>單價</th><th>售價</th><th>出售日期</th>
+              <th>狀況</th><th>地點</th><th>租期</th><th>進貨日期</th><th>備註</th><th>照片</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -269,23 +313,40 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
 
 <script>
 // ══════════════════════════════
-//  設定（視需要修改）
+//  設定
 // ══════════════════════════════
-const EXCEL_FILE = 'data.xlsx';   // Excel 檔名
-const SHEET_NAME = '堆高機';      // 工作表名稱
-const PHOTOS_DIR = 'photos';      // 照片根目錄
-const MAX_PHOTOS = 20;            // 每台最多嘗試幾張（1.jpg ~ N.jpg）
+const PASSWORD   = '0419';
+const EXCEL_FILE = 'forklift.xlsx';
+const SHEET_NAME = '堆高機合併';
+const PHOTOS_DIR = 'photos';
+const MAX_PHOTOS = 20;
 // ══════════════════════════════
 
 let DATA = [];
+
+// ── 密碼驗證 ──
+function checkPw() {
+  const val = document.getElementById('pw-input').value;
+  const errEl = document.getElementById('pw-error');
+  if (val === PASSWORD) {
+    document.getElementById('pw-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    init();
+  } else {
+    errEl.textContent = '密碼錯誤，請再試一次';
+    const input = document.getElementById('pw-input');
+    input.classList.add('error');
+    input.value = '';
+    setTimeout(() => input.classList.remove('error'), 500);
+  }
+}
 
 // ── 自動載入 Excel ──
 async function init() {
   try {
     const res = await fetch(EXCEL_FILE);
     if (!res.ok) throw new Error(`找不到 ${EXCEL_FILE}（HTTP ${res.status}）`);
-    const buf = await res.arrayBuffer();
-    parseExcel(buf);
+    parseExcel(await res.arrayBuffer());
   } catch(e) {
     showLoadError(e.message);
   }
@@ -293,8 +354,8 @@ async function init() {
 
 function parseExcel(buf) {
   const wb = XLSX.read(buf, { type: 'array' });
-  let sheet = wb.SheetNames.find(n => n === SHEET_NAME)
-           || wb.SheetNames.find(n => n.includes('堆高機') && !n.includes('租賃') && !n.includes('存貨'));
+  const sheet = wb.SheetNames.find(n => n === SHEET_NAME)
+             || wb.SheetNames.find(n => n.includes('堆高機'));
   if (!sheet) throw new Error(`找不到「${SHEET_NAME}」工作表。可用：${wb.SheetNames.join('、')}`);
 
   const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheet], { header: 1, defval: '' });
@@ -303,18 +364,17 @@ function parseExcel(buf) {
   let hRow = -1;
   for (let i = 0; i < Math.min(rows.length, 10); i++) {
     const r = rows[i].map(c => String(c).replace(/\s+/g,''));
-    if (r.includes('NO') && r.some(c => c.includes('型號'))) { hRow = i; break; }
+    if (r.includes('NO') && r.some(c => c.includes('型'))) { hRow = i; break; }
   }
-  if (hRow < 0) throw new Error('找不到表頭列（需含 NO、型號）');
+  if (hRow < 0) throw new Error('找不到表頭列');
 
   const H = rows[hRow].map(c => String(c).replace(/\s+/g,''));
   const ci = k => { const i = H.indexOf(k); return i >= 0 ? i : -1; };
   const C = {
-    NO: ci('NO'), 廠商: ci('廠商'), 型號: ci('型號'), 廠牌: ci('廠牌'),
-    型號規格: 4,
-    進貨日期: ci('進貨日期'), 單價: ci('單價'),
+    NO: ci('NO'), 廠商: ci('廠商'), 型式: ci('型式'), 廠牌: ci('廠牌'), 型號: ci('型號'),
+    進貨日期: ci('進貨日期'), 單價: ci('單價'), 售價: ci('售價'), 出售日期: ci('出售日期'),
     狀況: ci('狀況'), 地點: ci('地點'), 租期: ci('租期'),
-    噸數: ci('噸數'), 揚高: ci('揚高'), 備註: ci('備註'), 設定: ci('設定'),
+    噸數: ci('噸數'), 揚高: ci('揚高'), 備註: ci('備註'),
   };
 
   DATA = [];
@@ -324,19 +384,18 @@ function parseExcel(buf) {
     if (!no || no === 'NO' || ['合計','小計','總計'].some(k => no.includes(k))) continue;
     const g = k => (C[k] >= 0 && C[k] < r.length) ? String(r[C[k]] ?? '').trim() : '';
     DATA.push({
-      NO: no, 廠商: g('廠商'), 型號: g('型號'), 廠牌: g('廠牌'),
-      型號規格: g('型號規格'), 進貨日期: g('進貨日期'), 單價: g('單價'),
+      NO: no, 廠商: g('廠商'), 型式: g('型式'), 廠牌: g('廠牌'), 型號: g('型號'),
+      進貨日期: g('進貨日期'), 單價: g('單價'), 售價: g('售價'), 出售日期: g('出售日期'),
       狀況: g('狀況'), 地點: g('地點'), 租期: g('租期'),
-      噸數: g('噸數'), 揚高: g('揚高'), 備註: g('備註'), 設定: g('設定'),
+      噸數: g('噸數'), 揚高: g('揚高'), 備註: g('備註'),
     });
   }
-  if (DATA.length === 0) throw new Error('解析到 0 筆資料，請確認工作表格式');
+  if (DATA.length === 0) throw new Error('解析到 0 筆資料');
 
   document.getElementById('header-sub').textContent = `共 ${DATA.length} 筆`;
   document.getElementById('load-screen').style.display = 'none';
   document.getElementById('main-content').style.display = 'block';
-  initFilters();
-  render();
+  initFilters(); render();
 }
 
 // ── 篩選初始化 ──
@@ -347,7 +406,7 @@ function initFilters() {
     vals.forEach(v => s.add(new Option(v, v)));
   };
   const uniq = (k, fn) => [...new Set(DATA.map(r => r[k]).filter(Boolean))].sort(fn);
-  pop('f-type',   uniq('型號'));
+  pop('f-type',   uniq('型式'));
   pop('f-ton',    uniq('噸數',  (a,b) => parseFloat(a) - parseFloat(b)));
   pop('f-height', uniq('揚高',  (a,b) => parseInt(a)   - parseInt(b)));
   pop('f-brand',  uniq('廠牌'));
@@ -365,54 +424,55 @@ function render() {
   const fKw     = document.getElementById('f-search').value.trim().toLowerCase();
 
   const list = DATA.filter(r => {
-    if (fType   && r.型號 !== fType)   return false;
+    if (fType   && r.型式 !== fType)   return false;
     if (fTon    && r.噸數 !== fTon)    return false;
     if (fHeight && r.揚高 !== fHeight) return false;
     if (fBrand  && r.廠牌 !== fBrand)  return false;
-    if (fKw && ![r.廠商,r.型號規格,r.備註,r.狀況,r.設定,r.NO]
+    if (fKw && ![r.廠商,r.型號,r.備註,r.狀況,r.NO]
                .join(' ').toLowerCase().includes(fKw)) return false;
     return true;
   });
 
   document.getElementById('no-results').style.display = list.length ? 'none' : 'block';
-
-  const rented = list.filter(r => r.狀況).length;
+  const rented = list.filter(r => r.狀況 && !r.出售日期).length;
+  const sold   = list.filter(r => r.出售日期).length;
   document.getElementById('stats-row').innerHTML =
     `共 <strong>${DATA.length}</strong> 筆，顯示 <strong>${list.length}</strong> 筆　` +
-    `出租中 <strong>${rented}</strong>　庫存 <strong>${list.length - rented}</strong>`;
+    `出租中 <strong>${rented}</strong>　已售 <strong>${sold}</strong>　` +
+    `庫存 <strong>${list.length - rented - sold}</strong>`;
 
-  // NO 補零為3位數，對應資料夾名稱
-  const padNo = no => no.padStart(3, '0');
+  const padNo = no => String(no).padStart(3, '0');
+  const fmtPrice = p => { const n = parseInt(p); return isNaN(n) ? (p||'—') : n.toLocaleString(); };
 
   // ── 手機卡片 ──
   const cards = document.getElementById('cards');
   cards.innerHTML = '';
   list.forEach(r => {
-    const isRented = !!r.狀況;
-    const priceNum = parseInt(r.單價);
-    const price = isNaN(priceNum) ? (r.單價 || '—') : priceNum.toLocaleString();
+    const isSold   = !!r.出售日期;
+    const isRented = !!r.狀況 && !isSold;
+    const badgeClass = isSold ? 'badge-sold' : isRented ? 'badge-rented' : 'badge-stock';
+    const badgeText  = isSold ? '💰 已售' : isRented ? '🔑 '+r.狀況 : '📦 庫存';
     const d = document.createElement('div');
     d.className = 'card';
     d.innerHTML = `
       <div class="card-top">
         <span class="card-no">NO.${r.NO}</span>
-        <span class="card-type">${r.型號 || '—'}</span>
-        <span class="card-badge ${isRented ? 'badge-rented':'badge-stock'}">
-          ${isRented ? '🔑 '+r.狀況 : '📦 庫存'}
-        </span>
-        <button class="btn-photo" onclick="openPhotos('${padNo(r.NO)}','NO.${r.NO}')">📷 照片</button>
+        <span class="card-type">${r.型式||'—'}</span>
+        <span class="card-badge ${badgeClass}">${badgeText}</span>
+        <button class="btn-photo" onclick="openPhotos('${padNo(r.NO)}','NO.${r.NO}')">📷</button>
       </div>
       <div class="card-grid">
         <div class="ci"><span class="ci-label">廠商</span><span class="ci-val">${r.廠商||'—'}</span></div>
         <div class="ci"><span class="ci-label">廠牌</span><span class="ci-val">${r.廠牌||'—'}</span></div>
-        <div class="ci"><span class="ci-label">噸數</span><span class="ci-val">${r.噸數 ? r.噸數+'T' : '—'}</span></div>
-        <div class="ci"><span class="ci-label">揚高</span><span class="ci-val">${r.揚高 ? r.揚高+'mm' : '—'}</span></div>
-        <div class="ci"><span class="ci-label">單價</span><span class="ci-val price">${price}</span></div>
+        <div class="ci"><span class="ci-label">噸數</span><span class="ci-val">${r.噸數?r.噸數+'T':'—'}</span></div>
+        <div class="ci"><span class="ci-label">揚高</span><span class="ci-val">${r.揚高?r.揚高+'mm':'—'}</span></div>
+        <div class="ci"><span class="ci-label">單價</span><span class="ci-val price">${fmtPrice(r.單價)}</span></div>
+        ${r.售價?`<div class="ci"><span class="ci-label">售價</span><span class="ci-val sold-price">${fmtPrice(r.售價)}</span></div>`:''}
+        ${r.出售日期?`<div class="ci"><span class="ci-label">出售日期</span><span class="ci-val">${r.出售日期}</span></div>`:''}
         <div class="ci"><span class="ci-label">進貨日期</span><span class="ci-val">${r.進貨日期||'—'}</span></div>
-        ${r.型號規格 ? `<div class="ci full"><span class="ci-label">型號規格</span><span class="ci-val small">${r.型號規格}</span></div>` : ''}
-        ${r.租期 ? `<div class="ci full"><span class="ci-label">租期</span><span class="ci-val rent">📅 ${r.租期}${r.地點?' 📍'+r.地點:''}</span></div>` : ''}
-        ${r.備註 ? `<div class="ci full"><span class="ci-label">備註</span><span class="ci-val small">${r.備註}</span></div>` : ''}
-        ${r.設定 ? `<div class="ci full"><span class="ci-label">設定</span><span class="ci-val small">${r.設定}</span></div>` : ''}
+        ${r.型號?`<div class="ci full"><span class="ci-label">型號</span><span class="ci-val small">${r.型號}</span></div>`:''}
+        ${r.租期?`<div class="ci full"><span class="ci-label">租期</span><span class="ci-val rent">📅 ${r.租期}${r.地點?' 📍'+r.地點:''}</span></div>`:''}
+        ${r.備註?`<div class="ci full"><span class="ci-label">備註</span><span class="ci-val small">${r.備註}</span></div>`:''}
       </div>`;
     cards.appendChild(d);
   });
@@ -421,25 +481,25 @@ function render() {
   const tbody = document.getElementById('tbody');
   tbody.innerHTML = '';
   list.forEach(r => {
-    const isRented = !!r.狀況;
-    const priceNum = parseInt(r.單價);
-    const price = isNaN(priceNum) ? (r.單價||'—') : priceNum.toLocaleString();
+    const isSold   = !!r.出售日期;
+    const isRented = !!r.狀況 && !isSold;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="t-no">${r.NO}</td>
-      <td><span class="t-tag">${r.型號||'—'}</span></td>
+      <td><span class="t-tag">${r.型式||'—'}</span></td>
       <td>${r.廠商||'—'}</td>
       <td>${r.廠牌||'—'}</td>
-      <td class="t-note">${r.型號規格||'—'}</td>
+      <td class="t-note">${r.型號||'—'}</td>
       <td class="t-num">${r.噸數||'—'}</td>
       <td class="t-num">${r.揚高||'—'}</td>
-      <td class="t-price">${price}</td>
-      <td class="${isRented?'t-active':'t-dim'}">${r.狀況||'—'}</td>
+      <td class="t-price">${fmtPrice(r.單價)}</td>
+      <td class="t-sold-price">${r.售價?fmtPrice(r.售價):'—'}</td>
+      <td>${r.出售日期||'—'}</td>
+      <td class="${isRented?'t-active':isSold?'t-dim':'t-dim'}">${r.狀況||'—'}</td>
       <td>${r.地點||'—'}</td>
       <td class="t-rent">${r.租期||'—'}</td>
       <td>${r.進貨日期||'—'}</td>
       <td class="t-note">${r.備註||'—'}</td>
-      <td>${r.設定||'—'}</td>
       <td class="t-photo">
         <button class="btn-photo" onclick="openPhotos('${padNo(r.NO)}','NO.${r.NO}')">📷</button>
       </td>`;
@@ -453,7 +513,7 @@ function resetFilters() {
   render();
 }
 
-// ── 照片 Modal：依序嘗試 1.jpg、2.jpg... 直到找不到為止 ──
+// ── 照片 Modal ──
 async function openPhotos(noStr, label) {
   document.getElementById('modal-title').textContent = label + ' 的照片';
   document.getElementById('photo-wrap').innerHTML = '<div class="photo-status">🔍 載入照片中...</div>';
@@ -462,30 +522,24 @@ async function openPhotos(noStr, label) {
 
   const dir = `${PHOTOS_DIR}/NO.${noStr}`;
   const found = [];
-
-  // 依序嘗試 1.jpg, 2.jpg, ...，遇到第一個 404 就停止
   for (let n = 1; n <= MAX_PHOTOS; n++) {
-    const url = `${dir}/${n}.jpg`;
     try {
-      const r = await fetch(url, { method: 'HEAD' });
-      if (r.ok) { found.push(url); }
-      else { break; }  // 404 → 停止
+      const r = await fetch(`${dir}/${n}.jpg`, { method: 'HEAD' });
+      if (r.ok) found.push(`${dir}/${n}.jpg`);
+      else break;
     } catch { break; }
   }
 
   const wrap = document.getElementById('photo-wrap');
   if (found.length === 0) {
-    wrap.innerHTML = `<div class="photo-status">📷 此台尚無照片<br><small>請將照片放在 ${dir}/ 資料夾內<br>命名為 1.jpg、2.jpg...</small></div>`;
+    wrap.innerHTML = `<div class="photo-status">📷 此台尚無照片<br><small>${dir}/1.jpg, 2.jpg...</small></div>`;
     return;
   }
-
   wrap.innerHTML = '<div class="photo-grid" id="photo-grid"></div>';
   const grid = document.getElementById('photo-grid');
   found.forEach(url => {
     const img = document.createElement('img');
-    img.src = url;
-    img.alt = '堆高機照片';
-    img.loading = 'lazy';
+    img.src = url; img.loading = 'lazy';
     img.onclick = () => openViewer(url);
     grid.appendChild(img);
   });
@@ -499,7 +553,6 @@ document.getElementById('photo-modal').addEventListener('click', e => {
   if (e.target === document.getElementById('photo-modal')) closeModal();
 });
 
-// ── 全螢幕單張 ──
 function openViewer(url) {
   document.getElementById('viewer-img').src = url;
   document.getElementById('img-viewer').classList.add('open');
@@ -518,11 +571,8 @@ function showLoadError(msg) {
   document.querySelector('.load-box p').textContent = '請確認 GitHub 上的檔案路徑是否正確。';
   document.getElementById('spinner').style.display = 'none';
   const el = document.getElementById('error-box');
-  el.textContent = '❌ ' + msg;
-  el.style.display = 'block';
+  el.textContent = '❌ ' + msg; el.style.display = 'block';
 }
-
-init();
 </script>
 </body>
 </html>
