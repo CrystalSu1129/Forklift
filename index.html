@@ -183,6 +183,19 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
 
 .no-results { text-align: center; padding: 48px; color: #ccc; font-size: 14px; display: none; }
 
+/* ── 回到頂部 ── */
+#back-top {
+  position: fixed; bottom: 24px; right: 18px; z-index: 150;
+  background: #1a3a5c; color: #fff; border: none;
+  border-radius: 50%; width: 44px; height: 44px;
+  font-size: 20px; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  display: none; align-items: center; justify-content: center;
+  transition: opacity .2s, transform .2s;
+}
+#back-top.visible { display: flex; }
+#back-top:active { transform: scale(0.92); }
+
 /* ── 照片 Modal ── */
 #photo-modal {
   display: none; position: fixed; inset: 0; z-index: 200;
@@ -282,9 +295,9 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
         <table>
           <thead>
             <tr>
-              <th>NO</th><th>型式</th><th>廠商</th><th>廠牌</th><th>型號</th>
+              <th>NO</th><th>照片</th><th>型式</th><th>廠商</th><th>廠牌</th><th>型號</th>
               <th>噸數</th><th>揚高</th><th>單價</th><th>售價</th><th>出售日期</th>
-              <th>狀況</th><th>地點</th><th>租期</th><th>進貨日期</th><th>備註</th><th>照片</th>
+              <th>狀況</th><th>地點</th><th>租期</th><th>進貨日期</th><th>備註</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -380,8 +393,10 @@ function parseExcel(buf) {
   DATA = [];
   for (let i = hRow + 1; i < rows.length; i++) {
     const r = rows[i];
-    const no = String(r[C.NO] ?? '').trim();
-    if (!no || no === 'NO' || ['合計','小計','總計'].some(k => no.includes(k))) continue;
+    const noRaw = String(r[C.NO] ?? '').trim();
+    if (!noRaw || noRaw === 'NO' || ['合計','小計','總計'].some(k => noRaw.includes(k))) continue;
+    // 去掉浮點數的 .0（"1.0" → "1"）
+    const no = isNaN(parseFloat(noRaw)) ? noRaw : String(parseInt(parseFloat(noRaw)));
     const g = k => (C[k] >= 0 && C[k] < r.length) ? String(r[C[k]] ?? '').trim() : '';
     DATA.push({
       NO: no, 廠商: g('廠商'), 型式: g('型式'), 廠牌: g('廠牌'), 型號: g('型號'),
@@ -441,7 +456,8 @@ function render() {
     `出租中 <strong>${rented}</strong>　已售 <strong>${sold}</strong>　` +
     `庫存 <strong>${list.length - rented - sold}</strong>`;
 
-  const padNo = no => String(no).padStart(3, '0');
+  // NO 可能是 "1.0" 這種浮點字串，先轉成整數再補零
+  const padNo = no => String(parseInt(parseFloat(no))).padStart(3, '0');
   const fmtPrice = p => { const n = parseInt(p); return isNaN(n) ? (p||'—') : n.toLocaleString(); };
 
   // ── 手機卡片 ──
@@ -486,6 +502,9 @@ function render() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="t-no">${r.NO}</td>
+      <td class="t-photo">
+        <button class="btn-photo" onclick="openPhotos('${padNo(r.NO)}','NO.${r.NO}')">📷</button>
+      </td>
       <td><span class="t-tag">${r.型式||'—'}</span></td>
       <td>${r.廠商||'—'}</td>
       <td>${r.廠牌||'—'}</td>
@@ -499,10 +518,7 @@ function render() {
       <td>${r.地點||'—'}</td>
       <td class="t-rent">${r.租期||'—'}</td>
       <td>${r.進貨日期||'—'}</td>
-      <td class="t-note">${r.備註||'—'}</td>
-      <td class="t-photo">
-        <button class="btn-photo" onclick="openPhotos('${padNo(r.NO)}','NO.${r.NO}')">📷</button>
-      </td>`;
+      <td class="t-note">${r.備註||'—'}</td>`;
     tbody.appendChild(tr);
   });
 }
