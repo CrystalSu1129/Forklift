@@ -496,7 +496,7 @@ function render() {
         <span class="card-no">NO.${r.NO}</span>
         <span class="card-type">${r.型式||'—'}</span>
         <span class="card-badge ${badgeClass}">${badgeText}</span>
-        <button class="btn-photo no-photo" id="pb-${r.NO}" onclick="openPhotos('${padNo(r.NO)}','NO.${r.NO}')">無圖</button>
+        <button class="btn-photo" id="pb-${r.NO}" onclick="openPhotos('${padNo(r.NO)}','NO.${r.NO}')">圖片</button>
       </div>
       <div class="card-grid">
         <div class="ci"><span class="ci-label">廠商</span><span class="ci-val">${r.廠商||'—'}</span></div>
@@ -524,7 +524,7 @@ function render() {
     tr.innerHTML = `
       <td class="t-no">${r.NO}</td>
       <td class="t-photo">
-        <button class="btn-photo no-photo" id="pb-${r.NO}" onclick="openPhotos('${padNo(r.NO)}','NO.${r.NO}')">無圖</button>
+        <button class="btn-photo" id="pb-${r.NO}" onclick="openPhotos('${padNo(r.NO)}','NO.${r.NO}')">圖片</button>
       </td>
       <td><span class="t-tag">${r.型式||'—'}</span></td>
       <td class="t-small">${r.廠商||'<span class="t-dim">—</span>'}</td>
