@@ -156,28 +156,35 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
   .cards { display: none; }
   .table-wrap {
     margin: 8px 12px 24px; background: #fff; border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; display: block;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: block;
+    /* overflow:hidden 移除，改由 table-scroll 控制 */
   }
-  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .table-scroll { overflow-x: auto; overflow-y: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; max-height: calc(100vh - 155px); }
   table { width: 100%; border-collapse: collapse; min-width: 960px; }
   thead th {
     background: #1a3a5c; color: #fff; padding: 10px 11px;
     font-size: 12px; font-weight: 600; text-align: left; white-space: nowrap;
+    position: sticky; top: 0; z-index: 2;
   }
+  /* 型式欄直書 */
+  th:nth-child(3) { width: 36px; text-align: center; writing-mode: vertical-rl; padding: 10px 6px; }
+  td:nth-child(3) { width: 36px; text-align: center; }
   tbody tr { border-bottom: 1px solid #eef1f6; transition: background .1s; }
   tbody tr:hover { background: #f4f8ff; }
   tbody tr:last-child { border-bottom: none; }
   td { padding: 8px 11px; vertical-align: middle; font-size: 13px; }
-  .t-no    { color: #bbb; text-align: center; width: 42px; font-size: 12px; }
-  .t-tag   { display: inline-block; background: #e8f0fe; color: #1a4ca0; border-radius: 5px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .t-no    { color: #bbb; text-align: center; font-size: 12px; }
+  .t-tag   { display: inline-block; background: #e8f0fe; color: #1a4ca0; border-radius: 5px; padding: 6px 2px; font-size: 11px; font-weight: 700; writing-mode: vertical-rl; text-align: center; line-height: 1.2; }
   .t-num   { text-align: center; }
+  .t-dim   { text-align: center; color: #ccc; }
   .t-price { text-align: right; color: #1a7a3a; font-weight: 700; }
   .t-sold-price { text-align: right; color: #b7770d; font-weight: 700; }
-  .t-active { color: #1a7a3a; font-weight: 600; }
-  .t-dim   { color: #ccc; }
-  .t-note  { font-size: 12px; color: #666; max-width: 170px; }
-  .t-rent  { font-size: 12px; color: #2563a0; }
+  .t-active { color: #1a7a3a; font-weight: 600; white-space: normal; max-width: 80px; }
+  .t-note  { font-size: 12px; color: #666; max-width: 180px; white-space: normal; word-break: break-all; }
+  .t-rent  { font-size: 12px; color: #2563a0; white-space: normal; max-width: 120px; }
   .t-photo { text-align: center; }
+  .t-small { font-size: 12px; white-space: normal; max-width: 100px; word-break: break-all; }
+  .t-model { font-size: 12px; color: #444; white-space: normal; max-width: 180px; word-break: break-all; }
 }
 @media (max-width: 767px) { .table-wrap { display: none; } }
 
@@ -255,7 +262,7 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
 <!-- ── 主應用 ── -->
 <div id="app">
   <header>
-    <div class="icon">🏗️</div>
+    <div class="icon">🚜</div>
     <div>
       <h1>堆高機存貨、租賃明細</h1>
       <div class="sub" id="header-sub">載入中...</div>
@@ -280,6 +287,12 @@ header .sub { font-size: 11px; opacity: .6; margin-top: 1px; }
       <select id="f-ton"><option value="">全部噸數</option></select>
       <select id="f-height"><option value="">全部揚高</option></select>
       <select id="f-brand"><option value="">全部廠牌</option></select>
+      <select id="f-sold">
+        <option value="">全部狀態</option>
+        <option value="sold">售出</option>
+        <option value="rented">出租</option>
+        <option value="stock">庫存</option>
+      </select>
       <input type="search" id="f-search" placeholder="搜尋廠商、型號、備註...">
       <button class="btn-reset" onclick="resetFilters()">✕ 重設</button>
     </div>
@@ -425,7 +438,7 @@ function initFilters() {
   pop('f-ton',    uniq('噸數',  (a,b) => parseFloat(a) - parseFloat(b)));
   pop('f-height', uniq('揚高',  (a,b) => parseInt(a)   - parseInt(b)));
   pop('f-brand',  uniq('廠牌'));
-  ['f-type','f-ton','f-height','f-brand'].forEach(id =>
+  ['f-type','f-ton','f-height','f-brand','f-sold'].forEach(id =>
     document.getElementById(id).addEventListener('change', render));
   document.getElementById('f-search').addEventListener('input', render);
 }
@@ -436,6 +449,7 @@ function render() {
   const fTon    = document.getElementById('f-ton').value;
   const fHeight = document.getElementById('f-height').value;
   const fBrand  = document.getElementById('f-brand').value;
+  const fSold   = document.getElementById('f-sold').value;
   const fKw     = document.getElementById('f-search').value.trim().toLowerCase();
 
   const list = DATA.filter(r => {
@@ -443,18 +457,21 @@ function render() {
     if (fTon    && r.噸數 !== fTon)    return false;
     if (fHeight && r.揚高 !== fHeight) return false;
     if (fBrand  && r.廠牌 !== fBrand)  return false;
+    if (fSold === 'sold'   && !r.售價)            return false;  // 有售價 = 售出
+    if (fSold === 'rented' && !r.租期)            return false;  // 有租期 = 出租
+    if (fSold === 'stock'  && (r.售價 || r.租期)) return false;  // 兩者都沒有 = 庫存
     if (fKw && ![r.廠商,r.型號,r.備註,r.狀況,r.NO]
                .join(' ').toLowerCase().includes(fKw)) return false;
     return true;
   });
 
   document.getElementById('no-results').style.display = list.length ? 'none' : 'block';
-  const rented = list.filter(r => r.狀況 && !r.出售日期).length;
-  const sold   = list.filter(r => r.出售日期).length;
+  const sold   = list.filter(r => r.售價).length;
+  const rented = list.filter(r => r.租期 && !r.售價).length;
+  const stock  = list.filter(r => !r.售價 && !r.租期).length;
   document.getElementById('stats-row').innerHTML =
     `共 <strong>${DATA.length}</strong> 筆，顯示 <strong>${list.length}</strong> 筆　` +
-    `出租中 <strong>${rented}</strong>　已售 <strong>${sold}</strong>　` +
-    `庫存 <strong>${list.length - rented - sold}</strong>`;
+    `售出 <strong>${sold}</strong>　出租中 <strong>${rented}</strong>　庫存 <strong>${stock}</strong>`;
 
   // NO 可能是 "1.0" 這種浮點字串，先轉成整數再補零
   const padNo = no => String(parseInt(parseFloat(no))).padStart(3, '0');
@@ -467,7 +484,7 @@ function render() {
     const isSold   = !!r.出售日期;
     const isRented = !!r.狀況 && !isSold;
     const badgeClass = isSold ? 'badge-sold' : isRented ? 'badge-rented' : 'badge-stock';
-    const badgeText  = isSold ? '💰 已售' : isRented ? '🔑 '+r.狀況 : '📦 庫存';
+    const badgeText  = isSold ? '? 已售' : isRented ? '? '+r.狀況 : '? 庫存';
     const d = document.createElement('div');
     d.className = 'card';
     d.innerHTML = `
@@ -475,7 +492,7 @@ function render() {
         <span class="card-no">NO.${r.NO}</span>
         <span class="card-type">${r.型式||'—'}</span>
         <span class="card-badge ${badgeClass}">${badgeText}</span>
-        <button class="btn-photo" onclick="openPhotos('${padNo(r.NO)}','NO.${r.NO}')">📷</button>
+        <button class="btn-photo" onclick="openPhotos('${padNo(r.NO)}','NO.${r.NO}')">?</button>
       </div>
       <div class="card-grid">
         <div class="ci"><span class="ci-label">廠商</span><span class="ci-val">${r.廠商||'—'}</span></div>
@@ -487,7 +504,7 @@ function render() {
         ${r.出售日期?`<div class="ci"><span class="ci-label">出售日期</span><span class="ci-val">${r.出售日期}</span></div>`:''}
         <div class="ci"><span class="ci-label">進貨日期</span><span class="ci-val">${r.進貨日期||'—'}</span></div>
         ${r.型號?`<div class="ci full"><span class="ci-label">型號</span><span class="ci-val small">${r.型號}</span></div>`:''}
-        ${r.租期?`<div class="ci full"><span class="ci-label">租期</span><span class="ci-val rent">📅 ${r.租期}${r.地點?' 📍'+r.地點:''}</span></div>`:''}
+        ${r.租期?`<div class="ci full"><span class="ci-label">租期</span><span class="ci-val rent">? ${r.租期}${r.地點?' ?'+r.地點:''}</span></div>`:''}
         ${r.備註?`<div class="ci full"><span class="ci-label">備註</span><span class="ci-val small">${r.備註}</span></div>`:''}
       </div>`;
     cards.appendChild(d);
@@ -503,28 +520,28 @@ function render() {
     tr.innerHTML = `
       <td class="t-no">${r.NO}</td>
       <td class="t-photo">
-        <button class="btn-photo" onclick="openPhotos('${padNo(r.NO)}','NO.${r.NO}')">📷</button>
+        <button class="btn-photo" onclick="openPhotos('${padNo(r.NO)}','NO.${r.NO}')">?</button>
       </td>
       <td><span class="t-tag">${r.型式||'—'}</span></td>
-      <td>${r.廠商||'—'}</td>
-      <td>${r.廠牌||'—'}</td>
-      <td class="t-note">${r.型號||'—'}</td>
-      <td class="t-num">${r.噸數||'—'}</td>
-      <td class="t-num">${r.揚高||'—'}</td>
+      <td class="t-small">${r.廠商||'<span class="t-dim">—</span>'}</td>
+      <td class="t-small">${r.廠牌||'<span class="t-dim">—</span>'}</td>
+      <td class="t-model">${r.型號||'<span class="t-dim">—</span>'}</td>
+      <td class="t-num">${r.噸數||'<span class="t-dim">—</span>'}</td>
+      <td class="t-num">${r.揚高||'<span class="t-dim">—</span>'}</td>
       <td class="t-price">${fmtPrice(r.單價)}</td>
-      <td class="t-sold-price">${r.售價?fmtPrice(r.售價):'—'}</td>
-      <td>${r.出售日期||'—'}</td>
-      <td class="${isRented?'t-active':isSold?'t-dim':'t-dim'}">${r.狀況||'—'}</td>
-      <td>${r.地點||'—'}</td>
-      <td class="t-rent">${r.租期||'—'}</td>
-      <td>${r.進貨日期||'—'}</td>
-      <td class="t-note">${r.備註||'—'}</td>`;
+      <td class="${r.售價?'t-sold-price':'t-dim'}">${r.售價?fmtPrice(r.售價):'—'}</td>
+      <td class="${r.出售日期?'t-small':'t-dim'}">${r.出售日期||'—'}</td>
+      <td class="${isRented?'t-active':'t-dim'}">${r.狀況||'—'}</td>
+      <td class="${r.地點?'t-small':'t-dim'}">${r.地點||'—'}</td>
+      <td class="t-rent">${r.租期||'<span class="t-dim">—</span>'}</td>
+      <td class="${r.進貨日期?'t-small':'t-dim'}">${r.進貨日期||'—'}</td>
+      <td class="t-note">${r.備註||'<span class="t-dim">—</span>'}</td>`;
     tbody.appendChild(tr);
   });
 }
 
 function resetFilters() {
-  ['f-type','f-ton','f-height','f-brand'].forEach(id => document.getElementById(id).value = '');
+  ['f-type','f-ton','f-height','f-brand','f-sold'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-search').value = '';
   render();
 }
@@ -532,7 +549,7 @@ function resetFilters() {
 // ── 照片 Modal ──
 async function openPhotos(noStr, label) {
   document.getElementById('modal-title').textContent = label + ' 的照片';
-  document.getElementById('photo-wrap').innerHTML = '<div class="photo-status">🔍 載入照片中...</div>';
+  document.getElementById('photo-wrap').innerHTML = '<div class="photo-status">? 載入照片中...</div>';
   document.getElementById('photo-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 
@@ -548,7 +565,7 @@ async function openPhotos(noStr, label) {
 
   const wrap = document.getElementById('photo-wrap');
   if (found.length === 0) {
-    wrap.innerHTML = `<div class="photo-status">📷 此台尚無照片<br><small>${dir}/1.jpg, 2.jpg...</small></div>`;
+    wrap.innerHTML = `<div class="photo-status">? 此台尚無照片<br><small>${dir}/1.jpg, 2.jpg...</small></div>`;
     return;
   }
   wrap.innerHTML = '<div class="photo-grid" id="photo-grid"></div>';
@@ -582,7 +599,7 @@ document.getElementById('img-viewer').addEventListener('click', e => {
 });
 
 function showLoadError(msg) {
-  document.querySelector('.load-icon').textContent = '😓';
+  document.querySelector('.load-icon').textContent = '?';
   document.querySelector('.load-box h2').textContent = '載入失敗';
   document.querySelector('.load-box p').textContent = '請確認 GitHub 上的檔案路徑是否正確。';
   document.getElementById('spinner').style.display = 'none';
