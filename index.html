@@ -543,17 +543,15 @@ function render() {
     tbody.appendChild(tr);
   });
 
-  // 非同步偵測每台是否有照片，更新按鈕狀態
+  // 用 img 載入偵測照片是否存在（避免 CORS 問題）
   list.forEach(r => {
     const noStr = padNo(r.NO);
-    fetch(`${PHOTOS_DIR}/NO.${noStr}/1.jpg`, { method: 'HEAD' })
-      .then(res => {
-        if (res.ok) {
-          const btn = document.getElementById('pb-' + r.NO);
-          if (btn) { btn.textContent = '圖片'; btn.classList.remove('no-photo'); }
-        }
-      })
-      .catch(() => {});
+    const testImg = new Image();
+    testImg.onload = () => {
+      const btn = document.getElementById('pb-' + r.NO);
+      if (btn) { btn.textContent = '圖片'; btn.classList.remove('no-photo'); }
+    };
+    testImg.src = `${PHOTOS_DIR}/NO.${noStr}/1.jpg`;
   });
 }
 
@@ -572,12 +570,19 @@ async function openPhotos(noStr, label) {
 
   const dir = `${PHOTOS_DIR}/NO.${noStr}`;
   const found = [];
+
+  // 用 img 載入逐一偵測（避免 CORS 問題）
+  const checkImg = (n) => new Promise(resolve => {
+    const img = new Image();
+    img.onload  = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = `${dir}/${n}.jpg`;
+  });
+
   for (let n = 1; n <= MAX_PHOTOS; n++) {
-    try {
-      const r = await fetch(`${dir}/${n}.jpg`, { method: 'HEAD' });
-      if (r.ok) found.push(`${dir}/${n}.jpg`);
-      else break;
-    } catch { break; }
+    const exists = await checkImg(n);
+    if (exists) found.push(`${dir}/${n}.jpg`);
+    else break;
   }
 
   const wrap = document.getElementById('photo-wrap');
