@@ -543,15 +543,10 @@ function render() {
     tbody.appendChild(tr);
   });
 
-  // 用 img 載入偵測照片是否存在（避免 CORS 問題）
+  // 非同步偵測每台是否有照片，更新按鈕狀態
   list.forEach(r => {
-    const noStr = padNo(r.NO);
-    const testImg = new Image();
-    testImg.onload = () => {
-      const btn = document.getElementById('pb-' + r.NO);
-      if (btn) { btn.textContent = '圖片'; btn.classList.remove('no-photo'); }
-    };
-    testImg.src = `${PHOTOS_DIR}/NO.${noStr}/1.jpg`;
+    const btn = document.getElementById('pb-' + r.NO);
+    if (btn) { btn.textContent = '圖片'; btn.classList.remove('no-photo'); }
   });
 }
 
